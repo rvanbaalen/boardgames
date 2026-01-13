@@ -50,11 +50,30 @@ const gameSchema = {
   description="Free digital score card for Tienduizenden (Ten Thousand / Farkle). Track player scores, turns, and game history. Works offline, no account needed."
   canonicalPath="/tienduizenden"
   schema={gameSchema}
+  lang="nl"
 >
   <TienduizendenGame client:only="react" />
+
+  <noscript>
+    <div class="noscript-message">
+      <h2>JavaScript vereist</h2>
+      <p>Deze scorekaart heeft JavaScript nodig om te werken. Schakel JavaScript in om de Tienduizenden scorekaart te gebruiken.</p>
+    </div>
+  </noscript>
 </Layout>
 
 <style is:global>
+  .noscript-message {
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-light);
+  }
+
+  .noscript-message h2 {
+    margin-bottom: 1rem;
+    color: var(--accent-yellow);
+  }
+
   /* Tienduizenden Game Styles */
   :root {
     --bg-dark: #1a1a2e;
