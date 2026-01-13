@@ -1,11 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
+interface HistoryEntry {
+  id: string;
+  value: number;
+  type: 'add' | 'farkle';
+}
+
 interface Player {
   id: string;
   name: string;
   score: number;
-  history: { value: number; type: 'add' | 'farkle' }[];
+  history: HistoryEntry[];
   color: string;
 }
 
@@ -84,6 +90,23 @@ export default function TienduizendenGame() {
     setDeleteConfirmPlayer(null);
   }, [currentPlayerIndex, deleteConfirmPlayer]);
 
+  const deleteScore = useCallback((playerId: string, historyId: string) => {
+    setPlayers(prev => prev.map(p => {
+      if (p.id !== playerId) return p;
+
+      const historyItem = p.history.find(h => h.id === historyId);
+      if (!historyItem) return p;
+
+      const scoreChange = historyItem.type === 'add' ? -historyItem.value : 0;
+
+      return {
+        ...p,
+        score: p.score + scoreChange,
+        history: p.history.filter(h => h.id !== historyId),
+      };
+    }));
+  }, []);
+
   const updatePlayerName = useCallback((id: string, name: string) => {
     setPlayers(prev => prev.map(p =>
       p.id === id ? { ...p, name: name || 'Speler' } : p
@@ -145,6 +168,7 @@ export default function TienduizendenGame() {
           ...p,
           score: p.score + value,
           history: [...p.history, {
+            id: generateId(),
             value: value,
             type: 'add' as const,
           }],
@@ -168,7 +192,7 @@ export default function TienduizendenGame() {
   const farkle = useCallback((playerId: string) => {
     setPlayers(prev => prev.map(p =>
       p.id === playerId
-        ? { ...p, history: [...p.history, { value: 0, type: 'farkle' as const }] }
+        ? { ...p, history: [...p.history, { id: generateId(), value: 0, type: 'farkle' as const }] }
         : p
     ));
     nextTurn();
@@ -296,16 +320,25 @@ export default function TienduizendenGame() {
                       <span className="history-empty">Nog geen scores</span>
                     ) : (
                       <AnimatePresence initial={false}>
-                        {player.history.slice().reverse().map((h, i) => (
-                          <motion.span
-                            key={`${player.history.length - 1 - i}-${h.value}-${h.type}`}
+                        {player.history.slice().reverse().map((h) => (
+                          <motion.button
+                            key={h.id}
+                            layout
                             className={`history-item ${h.type}`}
-                            initial={{ opacity: 0, x: -20, height: 0 }}
-                            animate={{ opacity: 1, x: 0, height: 'auto' }}
-                            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                            initial={{ opacity: 0, x: -30 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 50 }}
+                            transition={{
+                              type: 'spring',
+                              stiffness: 500,
+                              damping: 30,
+                              layout: { type: 'spring', stiffness: 400, damping: 30 }
+                            }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => deleteScore(player.id, h.id)}
                           >
                             {h.type === 'farkle' ? '💥 Kaput' : '+' + h.value.toLocaleString('nl-NL')}
-                          </motion.span>
+                          </motion.button>
                         ))}
                       </AnimatePresence>
                     )}
@@ -384,7 +417,7 @@ export default function TienduizendenGame() {
       </div>
 
       <footer className="game-footer">
-        <p><a href="/boardgames/tienduizenden/spelregels">Volledige spelregels & puntentelling</a></p>
+        <p><a href="/tienduizenden/spelregels">Volledige spelregels & puntentelling</a></p>
         <p>All processing happens in your browser. No data is sent to any server.</p>
         <p>Made by <a href="https://robinvanbaalen.nl?utm_source=boardgames&utm_medium=footer&utm_campaign=tienduizenden" target="_blank">Robin</a>.</p>
       </footer>

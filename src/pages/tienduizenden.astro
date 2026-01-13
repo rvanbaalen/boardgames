@@ -417,6 +417,18 @@ const gameSchema = {
     border-radius: 4px;
     background: rgba(255,255,255,0.05);
     text-align: right;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .history-item:hover {
+    background: rgba(255,255,255,0.1);
+  }
+
+  .history-item:active {
+    background: rgba(255,255,255,0.15);
   }
 
   .history-item.add { color: var(--accent-green); }
