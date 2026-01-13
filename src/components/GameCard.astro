@@ -10,6 +10,7 @@ interface Props {
 }
 
 const { id, title, description, descriptionEn, players, duration, available } = Astro.props;
+const baseUrl = import.meta.env.BASE_URL;
 ---
 
 <article class="game-card">
@@ -59,7 +60,7 @@ const { id, title, description, descriptionEn, players, duration, available } = 
   </div>
 
   {available ? (
-    <a href={`/${id}`} class="play-button">
+    <a href={`${baseUrl}${id}`} class="play-button">
       Open Score Card
     </a>
   ) : (
