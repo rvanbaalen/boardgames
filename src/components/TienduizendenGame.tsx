@@ -1,10 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+
+interface HistoryEntry {
+  id: string;
+  value: number;
+  type: 'add' | 'farkle';
+}
 
 interface Player {
   id: string;
   name: string;
   score: number;
-  history: { value: number; type: 'add' | 'subtract' | 'farkle' }[];
+  history: HistoryEntry[];
   color: string;
 }
 
@@ -27,12 +34,11 @@ export default function TienduizendenGame() {
   const [scoreModal, setScoreModal] = useState<{
     isOpen: boolean;
     playerId: string | null;
-    mode: 'add' | 'subtract';
-  }>({ isOpen: false, playerId: null, mode: 'add' });
+  }>({ isOpen: false, playerId: null });
   const [currentScoreInput, setCurrentScoreInput] = useState('0');
   const [rulesModalOpen, setRulesModalOpen] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [expandedHistory, setExpandedHistory] = useState<Set<string>>(new Set());
+  const [deleteConfirmPlayer, setDeleteConfirmPlayer] = useState<string | null>(null);
   const [confettiActive, setConfettiActive] = useState(false);
 
   // Load game from localStorage
@@ -68,15 +74,38 @@ export default function TienduizendenGame() {
     }]);
   }, [players.length]);
 
-  const deletePlayer = useCallback((id: string) => {
+  const confirmDeletePlayer = useCallback((id: string) => {
+    setDeleteConfirmPlayer(id);
+  }, []);
+
+  const deletePlayer = useCallback(() => {
+    if (!deleteConfirmPlayer) return;
     setPlayers(prev => {
-      const newPlayers = prev.filter(p => p.id !== id);
+      const newPlayers = prev.filter(p => p.id !== deleteConfirmPlayer);
       if (currentPlayerIndex >= newPlayers.length && newPlayers.length > 0) {
         setCurrentPlayerIndex(0);
       }
       return newPlayers;
     });
-  }, [currentPlayerIndex]);
+    setDeleteConfirmPlayer(null);
+  }, [currentPlayerIndex, deleteConfirmPlayer]);
+
+  const deleteScore = useCallback((playerId: string, historyId: string) => {
+    setPlayers(prev => prev.map(p => {
+      if (p.id !== playerId) return p;
+
+      const historyItem = p.history.find(h => h.id === historyId);
+      if (!historyItem) return p;
+
+      const scoreChange = historyItem.type === 'add' ? -historyItem.value : 0;
+
+      return {
+        ...p,
+        score: p.score + scoreChange,
+        history: p.history.filter(h => h.id !== historyId),
+      };
+    }));
+  }, []);
 
   const updatePlayerName = useCallback((id: string, name: string) => {
     setPlayers(prev => prev.map(p =>
@@ -84,13 +113,13 @@ export default function TienduizendenGame() {
     ));
   }, []);
 
-  const openScoreModal = useCallback((playerId: string, mode: 'add' | 'subtract') => {
-    setScoreModal({ isOpen: true, playerId, mode });
+  const openScoreModal = useCallback((playerId: string) => {
+    setScoreModal({ isOpen: true, playerId });
     setCurrentScoreInput('0');
   }, []);
 
   const closeScoreModal = useCallback(() => {
-    setScoreModal({ isOpen: false, playerId: null, mode: 'add' });
+    setScoreModal({ isOpen: false, playerId: null });
   }, []);
 
   const appendDigit = useCallback((digit: string) => {
@@ -135,16 +164,13 @@ export default function TienduizendenGame() {
       const newPlayers = prev.map(p => {
         if (p.id !== scoreModal.playerId) return p;
 
-        const newScore = scoreModal.mode === 'add'
-          ? p.score + value
-          : Math.max(0, p.score - value);
-
         return {
           ...p,
-          score: newScore,
+          score: p.score + value,
           history: [...p.history, {
-            value: scoreModal.mode === 'add' ? value : -value,
-            type: scoreModal.mode,
+            id: generateId(),
+            value: value,
+            type: 'add' as const,
           }],
         };
       });
@@ -166,23 +192,11 @@ export default function TienduizendenGame() {
   const farkle = useCallback((playerId: string) => {
     setPlayers(prev => prev.map(p =>
       p.id === playerId
-        ? { ...p, history: [...p.history, { value: 0, type: 'farkle' as const }] }
+        ? { ...p, history: [...p.history, { id: generateId(), value: 0, type: 'farkle' as const }] }
         : p
     ));
     nextTurn();
   }, [nextTurn]);
-
-  const toggleHistory = useCallback((playerId: string) => {
-    setExpandedHistory(prev => {
-      const next = new Set(prev);
-      if (next.has(playerId)) {
-        next.delete(playerId);
-      } else {
-        next.add(playerId);
-      }
-      return next;
-    });
-  }, []);
 
   const getSortedPlayers = useCallback(() => {
     return [...players].sort((a, b) => b.score - a.score);
@@ -218,215 +232,422 @@ export default function TienduizendenGame() {
       <header className="game-header">
         <h1>
           <DiceIcon />
-          TIENDUIZEND
+          TIENDUIZENDEN
         </h1>
         <div className="target-score">Eerste tot 10.000 wint!</div>
       </header>
 
       <main className="game-main">
         <div className="players-list">
-          {players.map((player, index) => {
-            const rank = getPlayerRank(player.id);
-            const isActive = index === currentPlayerIndex && !winner;
-            const isWinner = player.score >= TARGET_SCORE;
-            const progress = Math.min(100, (player.score / TARGET_SCORE) * 100);
+          <AnimatePresence mode="popLayout">
+            {players.map((player, index) => {
+              const rank = getPlayerRank(player.id);
+              const isActive = index === currentPlayerIndex && !winner;
+              const isWinner = player.score >= TARGET_SCORE;
+              const progress = Math.min(100, (player.score / TARGET_SCORE) * 100);
 
-            return (
-              <div
-                key={player.id}
-                className={`player-card ${isActive ? 'active' : ''} ${isWinner ? 'winner' : ''}`}
-              >
-                {isWinner && <div className="winner-badge">WINNAAR!</div>}
-                <div className="player-header">
-                  <div className="player-name">
-                    <span className={`player-rank rank-${rank <= 3 ? rank : 'other'}`}>
+              return (
+                <motion.div
+                  key={player.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, y: -20 }}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 500,
+                    damping: 30,
+                    opacity: { duration: 0.2 }
+                  }}
+                  className={`player-card ${isActive ? 'active' : ''} ${isWinner ? 'winner' : ''}`}
+                >
+                  <motion.button
+                    className="btn-delete-small"
+                    onClick={() => confirmDeletePlayer(player.id)}
+                    aria-label="Verwijder speler"
+                    whileHover={{ scale: 1.1, opacity: 1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    ×
+                  </motion.button>
+                  {isWinner && (
+                    <motion.div
+                      className="winner-badge"
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 15 }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 15 }}
+                    >
+                      WINNAAR!
+                    </motion.div>
+                  )}
+                  <div className="player-header">
+                    <motion.span
+                      className={`player-rank rank-${rank <= 3 ? rank : 'other'}`}
+                      key={rank}
+                      initial={{ scale: 1.3 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+                    >
                       {rank}
-                    </span>
+                    </motion.span>
                     <input
                       type="text"
                       value={player.name}
                       onChange={(e) => updatePlayerName(player.id, e.target.value)}
                       onClick={(e) => (e.target as HTMLInputElement).select()}
+                      className="player-name-input"
                     />
-                    {isActive && <span className="turn-indicator">aan de beurt</span>}
                   </div>
-                </div>
-                <div className="player-score">
-                  {player.score.toLocaleString('nl-NL')}
-                </div>
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: `${progress}%` }} />
-                </div>
-                <div className="player-actions">
-                  <button
-                    className="btn btn-add"
-                    onClick={() => openScoreModal(player.id, 'add')}
+                  <motion.div
+                    className="player-score"
+                    key={player.score}
+                    initial={{ scale: 1.2, color: '#08d9d6' }}
+                    animate={{ scale: 1, color: isWinner ? '#ffd700' : '#f9ed69' }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                   >
-                    + Score
-                  </button>
-                  <button
-                    className="btn btn-subtract"
-                    onClick={() => openScoreModal(player.id, 'subtract')}
-                  >
-                    - Score
-                  </button>
-                  <button
-                    className="btn btn-farkle"
-                    onClick={() => farkle(player.id)}
-                  >
-                    <span role="img" aria-label="farkle">💥</span>
-                  </button>
-                  <button
-                    className="btn btn-delete"
-                    onClick={() => deletePlayer(player.id)}
-                  >
-                    <span role="img" aria-label="delete">🗑</span>
-                  </button>
-                </div>
-                <div
-                  className="history-toggle"
-                  onClick={() => toggleHistory(player.id)}
-                >
-                  {player.history.length} beurten — tik voor geschiedenis
-                </div>
-                {expandedHistory.has(player.id) && (
+                    {player.score.toLocaleString('nl-NL')}
+                  </motion.div>
+                  <div className="progress-bar">
+                    <motion.div
+                      className="progress-fill"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${progress}%` }}
+                      transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+                    />
+                  </div>
                   <div className="score-history">
-                    {player.history.slice(-20).map((h, i) => (
-                      <span key={i} className={`history-item ${h.type}`}>
-                        {h.type === 'farkle' ? '💥' : (h.value >= 0 ? '+' : '') + h.value}
-                      </span>
-                    ))}
+                    {player.history.length === 0 ? (
+                      <span className="history-empty">Nog geen scores</span>
+                    ) : (
+                      <AnimatePresence initial={false}>
+                        {player.history.slice().reverse().map((h) => (
+                          <motion.button
+                            key={h.id}
+                            layout
+                            className={`history-item ${h.type}`}
+                            initial={{ opacity: 0, x: -30 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 50 }}
+                            transition={{
+                              type: 'spring',
+                              stiffness: 500,
+                              damping: 30,
+                              layout: { type: 'spring', stiffness: 400, damping: 30 }
+                            }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => deleteScore(player.id, h.id)}
+                          >
+                            {h.type === 'farkle' ? '💥 Kaput' : '+' + h.value.toLocaleString('nl-NL')}
+                          </motion.button>
+                        ))}
+                      </AnimatePresence>
+                    )}
                   </div>
-                )}
-              </div>
-            );
-          })}
+                  <div className="player-actions">
+                    <motion.button
+                      className="btn btn-add"
+                      onClick={() => openScoreModal(player.id)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      + Score
+                    </motion.button>
+                    <motion.button
+                      className="btn btn-farkle"
+                      onClick={() => farkle(player.id)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      💥 Kaput
+                    </motion.button>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
         </div>
 
-        {players.length === 0 && (
-          <div className="empty-state">
-            <div className="empty-state-icon">🎲</div>
-            <p>Voeg spelers toe om te beginnen!</p>
-          </div>
-        )}
+        <AnimatePresence>
+          {players.length === 0 && (
+            <motion.div
+              className="empty-state"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <motion.div
+                className="empty-state-icon"
+                animate={{ rotate: [0, -10, 10, -10, 0] }}
+                transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
+              >
+                🎲
+              </motion.div>
+              <p>Voeg spelers toe om te beginnen!</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
       <div className="bottom-bar">
-        <button className="btn btn-large btn-add-player" onClick={addPlayer}>
+        <motion.button
+          className="btn btn-large btn-add-player"
+          onClick={addPlayer}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.95 }}
+        >
           <span role="img" aria-label="add">➕</span> Speler
-        </button>
-        <button className="btn btn-large btn-new-game" onClick={confirmNewGame}>
+        </motion.button>
+        <motion.button
+          className="btn btn-large btn-new-game"
+          onClick={confirmNewGame}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.95 }}
+        >
           <span role="img" aria-label="new">🔄</span> Nieuw Spel
-        </button>
-        <button className="btn btn-large btn-rules" onClick={() => setRulesModalOpen(true)}>
+        </motion.button>
+        <motion.button
+          className="btn btn-large btn-rules"
+          onClick={() => setRulesModalOpen(true)}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.95 }}
+        >
           <span role="img" aria-label="rules">📖</span> Spelregels & Puntentelling
-        </button>
+        </motion.button>
       </div>
 
       <footer className="game-footer">
+        <p><a href="/tienduizenden/spelregels">Volledige spelregels & puntentelling</a></p>
         <p>All processing happens in your browser. No data is sent to any server.</p>
         <p>Made by <a href="https://robinvanbaalen.nl?utm_source=boardgames&utm_medium=footer&utm_campaign=tienduizenden" target="_blank">Robin</a>.</p>
       </footer>
 
       {/* Score Input Modal */}
-      {scoreModal.isOpen && (
-        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && closeScoreModal()}>
-          <div className="modal">
-            <h2>
-              {currentPlayer?.name}: {scoreModal.mode === 'add' ? '+' : '-'}Score
-            </h2>
-            <div className="quick-scores">
-              {QUICK_SCORES.map(score => (
-                <button key={score} className="quick-btn" onClick={() => setQuickScore(score)}>
-                  {score}
-                </button>
-              ))}
-            </div>
-            <div className="score-input-display">
-              {parseInt(currentScoreInput).toLocaleString('nl-NL')}
-            </div>
-            <div className="numpad">
-              {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map(digit => (
-                <button key={digit} className="numpad-btn" onClick={() => appendDigit(digit)}>
-                  {digit}
-                </button>
-              ))}
-              <button className="numpad-btn clear" onClick={clearScore}>C</button>
-              <button className="numpad-btn" onClick={() => appendDigit('0')}>0</button>
-              <button className="numpad-btn backspace" onClick={backspace}>⌫</button>
-              <button className="numpad-btn confirm" onClick={confirmScore}>
-                ✓ Bevestig
-              </button>
-            </div>
-            <button className="modal-close" onClick={closeScoreModal}>
-              Annuleren
-            </button>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {scoreModal.isOpen && (
+          <motion.div
+            className="modal-overlay"
+            onClick={(e) => e.target === e.currentTarget && closeScoreModal()}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.div
+              className="modal"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            >
+              <h2>
+                {currentPlayer?.name}: +Score
+              </h2>
+              <div className="quick-scores">
+                {QUICK_SCORES.map(score => (
+                  <motion.button
+                    key={score}
+                    className="quick-btn"
+                    onClick={() => setQuickScore(score)}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    {score}
+                  </motion.button>
+                ))}
+              </div>
+              <motion.div
+                className="score-input-display"
+                key={currentScoreInput}
+                initial={{ scale: 1.1 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+              >
+                {parseInt(currentScoreInput).toLocaleString('nl-NL')}
+              </motion.div>
+              <div className="numpad">
+                {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map(digit => (
+                  <motion.button
+                    key={digit}
+                    className="numpad-btn"
+                    onClick={() => appendDigit(digit)}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    {digit}
+                  </motion.button>
+                ))}
+                <motion.button className="numpad-btn clear" onClick={clearScore} whileTap={{ scale: 0.9 }}>C</motion.button>
+                <motion.button className="numpad-btn" onClick={() => appendDigit('0')} whileTap={{ scale: 0.9 }}>0</motion.button>
+                <motion.button className="numpad-btn backspace" onClick={backspace} whileTap={{ scale: 0.9 }}>⌫</motion.button>
+                <motion.button
+                  className="numpad-btn confirm"
+                  onClick={confirmScore}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  ✓ Bevestig
+                </motion.button>
+              </div>
+              <motion.button
+                className="modal-close"
+                onClick={closeScoreModal}
+                whileTap={{ scale: 0.95 }}
+              >
+                Annuleren
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Rules Modal */}
-      {rulesModalOpen && (
-        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setRulesModalOpen(false)}>
-          <div className="modal">
-            <h2>🎲 Spelregels</h2>
-            <div className="rules-content">
-              <h3>Doel</h3>
-              <p>Eerste speler die 10.000 punten bereikt wint!</p>
+      <AnimatePresence>
+        {rulesModalOpen && (
+          <motion.div
+            className="modal-overlay"
+            onClick={(e) => e.target === e.currentTarget && setRulesModalOpen(false)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.div
+              className="modal"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            >
+              <h2>🎲 Spelregels</h2>
+              <div className="rules-content">
+                <h3>Doel</h3>
+                <p>Eerste speler die 10.000 punten bereikt wint!</p>
 
-              <h3>Spelverloop</h3>
-              <ul>
-                <li>Gooi met 6 dobbelstenen</li>
-                <li>Leg scorende dobbelstenen apart</li>
-                <li>Kies: stoppen en punten noteren, of doorgooien met resterende dobbelstenen</li>
-                <li>Als alle 6 dobbelstenen gescoord hebben, mag je opnieuw met 6 gooien!</li>
-              </ul>
+                <h3>Spelverloop</h3>
+                <ul>
+                  <li>Gooi met 6 dobbelstenen</li>
+                  <li>Leg scorende dobbelstenen apart</li>
+                  <li>Kies: stoppen en punten noteren, of doorgooien met resterende dobbelstenen</li>
+                  <li>Als alle 6 dobbelstenen gescoord hebben, mag je opnieuw met 6 gooien!</li>
+                </ul>
 
-              <h3>FARKLE! 💥</h3>
-              <p>Geen scorende dobbelsteen? Je verliest alle punten van deze beurt!</p>
+                <h3>FARKLE! 💥</h3>
+                <p>Geen scorende dobbelsteen? Je verliest alle punten van deze beurt!</p>
 
-              <h3>Puntentelling</h3>
-              <table className="scoring-table">
-                <tbody>
-                  <tr><td>Enkele 1</td><td>100</td></tr>
-                  <tr><td>Enkele 5</td><td>50</td></tr>
-                  <tr><td>Drie gelijke (behalve 1)</td><td>waarde × 100</td></tr>
-                  <tr><td>Drie 1-en</td><td>1000</td></tr>
-                  <tr><td>Vier gelijke</td><td>× 2</td></tr>
-                  <tr><td>Vijf gelijke</td><td>× 4</td></tr>
-                  <tr><td>Zes gelijke</td><td>× 8</td></tr>
-                  <tr><td>Straat (1-2-3-4-5-6)</td><td>1500</td></tr>
-                  <tr><td>Drie paren</td><td>1500</td></tr>
-                </tbody>
-              </table>
+                <h3>Puntentelling</h3>
+                <table className="scoring-table">
+                  <tbody>
+                    <tr><td>Enkele 1</td><td>100</td></tr>
+                    <tr><td>Enkele 5</td><td>50</td></tr>
+                    <tr><td>Drie gelijke (behalve 1)</td><td>waarde × 100</td></tr>
+                    <tr><td>Drie 1-en</td><td>1000</td></tr>
+                    <tr><td>Vier gelijke</td><td>× 2</td></tr>
+                    <tr><td>Vijf gelijke</td><td>× 4</td></tr>
+                    <tr><td>Zes gelijke</td><td>× 8</td></tr>
+                    <tr><td>Straat (1-2-3-4-5-6)</td><td>1500</td></tr>
+                    <tr><td>Drie paren</td><td>1500</td></tr>
+                  </tbody>
+                </table>
 
-              <h3>Opstarten</h3>
-              <p>Je moet minimaal 350 punten in één beurt halen om "op het bord" te komen.</p>
-            </div>
-            <button className="modal-close" onClick={() => setRulesModalOpen(false)}>
-              Sluiten
-            </button>
-          </div>
-        </div>
-      )}
+                <h3>Opstarten</h3>
+                <p>Je moet minimaal 600 punten in één beurt halen om "op het bord" te komen.</p>
+              </div>
+              <motion.button
+                className="modal-close"
+                onClick={() => setRulesModalOpen(false)}
+                whileTap={{ scale: 0.95 }}
+              >
+                Sluiten
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Confirm New Game Modal */}
-      {confirmModalOpen && (
-        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setConfirmModalOpen(false)}>
-          <div className="modal">
-            <h2>Nieuw Spel?</h2>
-            <p className="confirm-text">
-              Alle scores worden gereset. Weet je het zeker?
-            </p>
-            <button className="numpad-btn confirm" onClick={startNewGame}>
-              ✓ Ja, nieuw spel
-            </button>
-            <button className="modal-close" onClick={() => setConfirmModalOpen(false)}>
-              Annuleren
-            </button>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {confirmModalOpen && (
+          <motion.div
+            className="modal-overlay"
+            onClick={(e) => e.target === e.currentTarget && setConfirmModalOpen(false)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.div
+              className="modal"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            >
+              <h2>Nieuw Spel?</h2>
+              <p className="confirm-text">
+                Alle scores worden gereset. Weet je het zeker?
+              </p>
+              <motion.button
+                className="numpad-btn confirm"
+                onClick={startNewGame}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                ✓ Ja, nieuw spel
+              </motion.button>
+              <motion.button
+                className="modal-close"
+                onClick={() => setConfirmModalOpen(false)}
+                whileTap={{ scale: 0.95 }}
+              >
+                Annuleren
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Confirm Delete Player Modal */}
+      <AnimatePresence>
+        {deleteConfirmPlayer && (
+          <motion.div
+            className="modal-overlay"
+            onClick={(e) => e.target === e.currentTarget && setDeleteConfirmPlayer(null)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.div
+              className="modal modal-small"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            >
+              <h2>Speler verwijderen?</h2>
+              <p className="confirm-text">
+                {players.find(p => p.id === deleteConfirmPlayer)?.name} wordt verwijderd.
+              </p>
+              <div className="modal-actions">
+                <motion.button
+                  className="btn-cancel-action"
+                  onClick={() => setDeleteConfirmPlayer(null)}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Annuleren
+                </motion.button>
+                <motion.button
+                  className="btn-confirm-action"
+                  onClick={deletePlayer}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Verwijder
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Confetti */}
       {confettiActive && <Confetti />}

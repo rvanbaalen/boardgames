@@ -5,6 +5,7 @@ interface Props {
   canonicalPath?: string;
   ogImage?: string;
   schema?: object;
+  lang?: string;
 }
 
 const {
@@ -12,7 +13,8 @@ const {
   description = "Digital score cards for your favorite board games. Track scores offline with no data sent to servers.",
   canonicalPath = "",
   ogImage = "/og-image.png",
-  schema
+  schema,
+  lang = "en"
 } = Astro.props;
 
 const baseUrl = import.meta.env.BASE_URL;
@@ -41,7 +43,7 @@ const schemaData = schema || defaultSchema;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -64,7 +66,7 @@ const schemaData = schema || defaultSchema;
     <meta property="og:description" content={description} />
     <meta property="og:image" content={`${siteUrl}${ogImage}`} />
     <meta property="og:site_name" content="Board Game Score Cards" />
-    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale" content={lang === "nl" ? "nl_NL" : "en_US"} />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />

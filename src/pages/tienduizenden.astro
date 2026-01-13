@@ -50,11 +50,30 @@ const gameSchema = {
   description="Free digital score card for Tienduizenden (Ten Thousand / Farkle). Track player scores, turns, and game history. Works offline, no account needed."
   canonicalPath="/tienduizenden"
   schema={gameSchema}
+  lang="nl"
 >
   <TienduizendenGame client:only="react" />
+
+  <noscript>
+    <div class="noscript-message">
+      <h2>JavaScript vereist</h2>
+      <p>Deze scorekaart heeft JavaScript nodig om te werken. Schakel JavaScript in om de Tienduizenden scorekaart te gebruiken.</p>
+    </div>
+  </noscript>
 </Layout>
 
 <style is:global>
+  .noscript-message {
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-light);
+  }
+
+  .noscript-message h2 {
+    margin-bottom: 1rem;
+    color: var(--accent-yellow);
+  }
+
   /* Tienduizenden Game Styles */
   :root {
     --bg-dark: #1a1a2e;
@@ -163,8 +182,8 @@ const gameSchema = {
   /* Main content */
   .game-main {
     flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
     padding: 0.5rem 1rem 1rem;
     -webkit-overflow-scrolling: touch;
   }
@@ -172,8 +191,10 @@ const gameSchema = {
   /* Player Cards */
   .players-list {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 0.75rem;
+    height: 100%;
+    min-height: 0;
   }
 
   .player-card {
@@ -184,11 +205,28 @@ const gameSchema = {
     overflow: hidden;
     border: 2px solid transparent;
     transition: all 0.3s ease;
+    flex: 1;
+    min-width: 160px;
+    max-width: 280px;
+    display: flex;
+    flex-direction: column;
   }
 
   .player-card.active {
     border-color: var(--accent-green);
     box-shadow: 0 0 20px rgba(8, 217, 214, 0.3);
+    animation: pulse-active 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-active {
+    0%, 100% {
+      border-color: var(--accent-green);
+      box-shadow: 0 0 20px rgba(8, 217, 214, 0.3);
+    }
+    50% {
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 30px rgba(181, 55, 242, 0.4);
+    }
   }
 
   .player-card.winner {
@@ -204,34 +242,57 @@ const gameSchema = {
 
   .player-header {
     display: flex;
-    justify-content: space-between;
+    flex-direction: row;
     align-items: center;
-    margin-bottom: 0.5rem;
-  }
-
-  .player-name {
-    font-size: 1.1rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
+    justify-content: center;
     gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
   }
 
-  .player-name input {
+  .player-name-input {
     background: transparent;
     border: none;
     color: var(--text-light);
     font-family: inherit;
-    font-size: inherit;
-    font-weight: inherit;
-    width: 120px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    width: 100%;
+    max-width: 120px;
     padding: 0.25rem;
     border-radius: 4px;
+    text-align: center;
   }
 
-  .player-name input:focus {
+  .player-name-input:focus {
     outline: none;
     background: rgba(255,255,255,0.1);
+  }
+
+  .btn-delete-small {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.4;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-delete-small:hover {
+    opacity: 1;
+    background: rgba(233, 69, 96, 0.2);
+    color: var(--accent-red);
   }
 
   .player-rank {
@@ -294,11 +355,12 @@ const gameSchema = {
 
   .player-actions {
     display: flex;
+    flex-direction: column;
     gap: 0.5rem;
+    margin-top: auto;
   }
 
   .btn {
-    flex: 1;
     padding: 0.75rem;
     border: none;
     border-radius: 12px;
@@ -322,51 +384,54 @@ const gameSchema = {
     color: var(--bg-dark);
   }
 
-  .btn-subtract {
-    background: linear-gradient(135deg, var(--accent-red), #c73e54);
-    color: white;
-  }
-
   .btn-farkle {
     background: linear-gradient(135deg, var(--accent-purple), #9333ea);
     color: white;
-    flex: 0.6;
   }
 
-  .btn-delete {
-    background: rgba(255,255,255,0.1);
-    color: var(--text-muted);
-    flex: 0.4;
-    font-size: 1.2rem;
+  /* Score History */
+  .score-history {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.2);
+    overflow-y: auto;
+    min-height: 60px;
   }
 
-  /* Score History Toggle */
-  .history-toggle {
+  .history-empty {
     font-size: 0.8rem;
     color: var(--text-muted);
     text-align: center;
-    padding: 0.5rem;
-    cursor: pointer;
-  }
-
-  .score-history {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem;
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid rgba(255,255,255,0.1);
+    opacity: 0.6;
   }
 
   .history-item {
-    font-size: 0.75rem;
-    padding: 0.2rem 0.5rem;
+    font-size: 1.1rem;
+    font-family: 'Space Mono', monospace, system-ui;
+    padding: 0.4rem 0.6rem;
     border-radius: 4px;
     background: rgba(255,255,255,0.05);
+    text-align: right;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .history-item:hover {
+    background: rgba(255,255,255,0.1);
+  }
+
+  .history-item:active {
+    background: rgba(255,255,255,0.15);
   }
 
   .history-item.add { color: var(--accent-green); }
-  .history-item.subtract { color: var(--accent-red); }
   .history-item.farkle { color: var(--accent-purple); }
 
   /* Bottom Actions */
@@ -449,6 +514,44 @@ const gameSchema = {
     text-align: center;
     margin: 1rem 0;
     color: var(--text-muted);
+  }
+
+  .modal-small {
+    max-width: 280px;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .btn-confirm-action,
+  .btn-cancel-action {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-confirm-action {
+    background: var(--accent-red);
+    color: white;
+  }
+
+  .btn-cancel-action {
+    background: rgba(255,255,255,0.1);
+    color: var(--text-light);
+  }
+
+  .btn-confirm-action:active,
+  .btn-cancel-action:active {
+    transform: scale(0.95);
   }
 
   /* Score Input Modal */
@@ -586,18 +689,6 @@ const gameSchema = {
     font-size: 4rem;
     margin-bottom: 1rem;
     opacity: 0.5;
-  }
-
-  /* Turn indicator animation */
-  .turn-indicator {
-    font-size: 0.75rem;
-    color: var(--accent-green);
-    animation: blink 1.5s ease-in-out infinite;
-  }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
   }
 
   @keyframes shake {

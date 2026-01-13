@@ -1,0 +1,394 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const rulesSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "name": "Spelregels Tienduizenden",
+  "headline": "Tienduizenden Spelregels - Compleet Overzicht",
+  "description": "Leer hoe je Tienduizenden speelt. Complete spelregels, puntentelling en tips voor dit populaire Nederlandse dobbelspel.",
+  "author": {
+    "@type": "Person",
+    "name": "Robin van Baalen",
+    "url": "https://robinvanbaalen.nl"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Robin van Baalen",
+    "url": "https://robinvanbaalen.nl"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://rvanbaalen.github.io/boardgames/tienduizenden/spelregels"
+  },
+  "about": {
+    "@type": "Game",
+    "name": "Tienduizenden",
+    "alternateName": ["Ten Thousand", "Farkle", "10000"],
+    "numberOfPlayers": {
+      "@type": "QuantitativeValue",
+      "minValue": 2,
+      "maxValue": 6
+    }
+  }
+};
+---
+
+<Layout
+  title="Tienduizenden Spelregels - Leer het Dobbelspel Spelen"
+  description="Complete spelregels voor Tienduizenden (Ten Thousand / Farkle). Leer de puntentelling, strategie en tips voor dit klassieke Nederlandse dobbelspel."
+  canonicalPath="/tienduizenden/spelregels"
+  schema={rulesSchema}
+  lang="nl"
+>
+  <main class="rules-page">
+    <nav class="breadcrumb">
+      <a href="/boardgames/">Home</a>
+      <span>/</span>
+      <a href="/boardgames/tienduizenden">Tienduizenden</a>
+      <span>/</span>
+      <span>Spelregels</span>
+    </nav>
+
+    <article class="rules-article">
+      <header>
+        <h1>Tienduizenden Spelregels</h1>
+        <p class="intro">
+          Tienduizenden is een klassiek Nederlands dobbelspel, internationaal ook bekend als
+          <strong>Ten Thousand</strong> of <strong>Farkle</strong>. Het spel is eenvoudig te leren
+          maar biedt genoeg spanning en strategie voor urenlang speelplezier.
+        </p>
+        <a href="/boardgames/tienduizenden" class="cta-button">
+          🎲 Speel nu met onze gratis scorekaart
+        </a>
+      </header>
+
+      <section>
+        <h2>Wat heb je nodig?</h2>
+        <ul>
+          <li><strong>6 dobbelstenen</strong></li>
+          <li><strong>2-6 spelers</strong> (meer kan ook)</li>
+          <li>Een manier om punten bij te houden (pen en papier, of onze <a href="/boardgames/tienduizenden">digitale scorekaart</a>)</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Doel van het spel</h2>
+        <p>
+          De eerste speler die <strong>10.000 punten</strong> bereikt, wint het spel.
+          Punten verdien je door te gooien met de dobbelstenen en scorende combinaties apart te leggen.
+        </p>
+      </section>
+
+      <section>
+        <h2>Spelverloop</h2>
+        <ol>
+          <li>
+            <strong>Gooi alle 6 dobbelstenen</strong> - Begin je beurt door alle zes dobbelstenen te gooien.
+          </li>
+          <li>
+            <strong>Leg scorende dobbelstenen apart</strong> - Na elke worp moet je minstens één scorende
+            dobbelsteen apart leggen. Je mag er meer apart leggen als je wilt.
+          </li>
+          <li>
+            <strong>Kies: stoppen of doorgooien</strong> - Je kunt stoppen en je punten noteren, of
+            doorgooien met de overgebleven dobbelstenen voor meer punten.
+          </li>
+          <li>
+            <strong>Doorstart</strong> - Als alle 6 dobbelstenen gescoord hebben, mag je opnieuw
+            gooien met alle 6 dobbelstenen en je punten blijven staan!
+          </li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>Kaput! (Farkle)</h2>
+        <p>
+          Als je gooit en <strong>geen enkele scorende dobbelsteen</strong> hebt, ben je <strong>Kaput</strong>!
+          Je verliest alle punten die je deze beurt hebt verzameld en de beurt gaat naar de volgende speler.
+        </p>
+        <p class="tip">
+          💡 <strong>Tip:</strong> Hoe meer dobbelstenen je overhoudt om mee te gooien, hoe groter
+          de kans op Kaput. Weet wanneer je moet stoppen!
+        </p>
+      </section>
+
+      <section>
+        <h2>Puntentelling</h2>
+        <table class="scoring-table">
+          <thead>
+            <tr>
+              <th>Combinatie</th>
+              <th>Punten</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Enkele 1</td>
+              <td>100</td>
+            </tr>
+            <tr>
+              <td>Enkele 5</td>
+              <td>50</td>
+            </tr>
+            <tr>
+              <td>Drie 1-en</td>
+              <td>1.000</td>
+            </tr>
+            <tr>
+              <td>Drie 2-en</td>
+              <td>200</td>
+            </tr>
+            <tr>
+              <td>Drie 3-en</td>
+              <td>300</td>
+            </tr>
+            <tr>
+              <td>Drie 4-en</td>
+              <td>400</td>
+            </tr>
+            <tr>
+              <td>Drie 5-en</td>
+              <td>500</td>
+            </tr>
+            <tr>
+              <td>Drie 6-en</td>
+              <td>600</td>
+            </tr>
+            <tr>
+              <td>Vier gelijke</td>
+              <td>2× de waarde van drie gelijke</td>
+            </tr>
+            <tr>
+              <td>Vijf gelijke</td>
+              <td>4× de waarde van drie gelijke</td>
+            </tr>
+            <tr>
+              <td>Zes gelijke</td>
+              <td>8× de waarde van drie gelijke</td>
+            </tr>
+            <tr>
+              <td>Straat (1-2-3-4-5-6)</td>
+              <td>1.500</td>
+            </tr>
+            <tr>
+              <td>Drie paren</td>
+              <td>1.500</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Op het bord komen</h2>
+        <p>
+          Voordat je punten mag noteren, moet je eerst <strong>"op het bord komen"</strong>.
+          Dit betekent dat je in één beurt minimaal <strong>600 punten</strong> moet scoren.
+          Pas daarna tellen je punten mee.
+        </p>
+      </section>
+
+      <section>
+        <h2>Strategie en tips</h2>
+        <ul>
+          <li>
+            <strong>Neem geen onnodige risico's</strong> - Als je al veel punten hebt deze beurt,
+            overweeg om te stoppen in plaats van door te gooien.
+          </li>
+          <li>
+            <strong>Hou het aantal dobbelstenen in de gaten</strong> - Met 1 of 2 dobbelstenen
+            is de kans op Kaput groot.
+          </li>
+          <li>
+            <strong>Ga voor de doorstart</strong> - Als je 5 dobbelstenen hebt gescoord en de
+            zesde is een 1 of 5, pak die mee voor een doorstart met alle 6!
+          </li>
+          <li>
+            <strong>Let op je tegenstanders</strong> - Als iemand bijna 10.000 heeft, moet je
+            misschien meer risico nemen.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Variaties</h2>
+        <p>
+          Er bestaan veel variaties op Tienduizenden. Sommige groepen spelen met andere puntenwaarden
+          of extra regels. Spreek voor aanvang af welke regels jullie hanteren.
+        </p>
+        <p>
+          Populaire variaties zijn onder andere:
+        </p>
+        <ul>
+          <li>Andere minimumscores om op het bord te komen (350, 500, of 1000)</li>
+          <li>Bonus punten voor bepaalde combinaties</li>
+          <li>Eindspel waarbij andere spelers nog één beurt krijgen</li>
+        </ul>
+      </section>
+
+      <footer class="article-footer">
+        <h2>Start met spelen!</h2>
+        <p>
+          Nu je de regels kent, is het tijd om te spelen. Gebruik onze gratis digitale scorekaart
+          om de punten bij te houden. Werkt offline en er wordt geen data opgeslagen op servers.
+        </p>
+        <a href="/boardgames/tienduizenden" class="cta-button cta-large">
+          🎲 Open de Tienduizenden Scorekaart
+        </a>
+      </footer>
+    </article>
+  </main>
+</Layout>
+
+<style>
+  .rules-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1rem 1.5rem 3rem;
+  }
+
+  .breadcrumb {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    margin-bottom: 2rem;
+  }
+
+  .breadcrumb a {
+    color: #94a3b8;
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    color: #f8fafc;
+    text-decoration: underline;
+  }
+
+  .breadcrumb span {
+    margin: 0 0.5rem;
+  }
+
+  .rules-article header {
+    margin-bottom: 2.5rem;
+    text-align: center;
+  }
+
+  .rules-article h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #f9ed69, #e94560);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .intro {
+    font-size: 1.125rem;
+    color: #94a3b8;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .cta-button {
+    display: inline-block;
+    background: linear-gradient(135deg, #08d9d6, #06b6b3);
+    color: #1a1a2e;
+    padding: 0.875rem 1.75rem;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(8, 217, 214, 0.3);
+  }
+
+  .cta-large {
+    font-size: 1.125rem;
+    padding: 1rem 2rem;
+  }
+
+  section {
+    margin-bottom: 2.5rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    color: #08d9d6;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    line-height: 1.7;
+    margin-bottom: 1rem;
+    color: #e2e8f0;
+  }
+
+  ul, ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  li {
+    line-height: 1.7;
+    margin-bottom: 0.5rem;
+    color: #e2e8f0;
+  }
+
+  .tip {
+    background: rgba(249, 237, 105, 0.1);
+    border-left: 4px solid #f9ed69;
+    padding: 1rem;
+    border-radius: 0 8px 8px 0;
+  }
+
+  .scoring-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+  }
+
+  .scoring-table th,
+  .scoring-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .scoring-table th {
+    color: #f9ed69;
+    font-weight: 600;
+  }
+
+  .scoring-table td:last-child {
+    text-align: right;
+    font-family: 'Space Mono', monospace;
+    color: #08d9d6;
+  }
+
+  .scoring-table tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .article-footer {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .article-footer h2 {
+    color: #f9ed69;
+  }
+
+  @media (max-width: 640px) {
+    .rules-article h1 {
+      font-size: 1.875rem;
+    }
+
+    .rules-page {
+      padding: 1rem;
+    }
+  }
+</style>
