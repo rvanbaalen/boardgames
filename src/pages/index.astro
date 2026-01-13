@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import GameCard from '../components/GameCard.astro';
+import Footer from '../components/Footer.astro';
 
 const games = [
   {
@@ -36,9 +37,7 @@ const games = [
       ))}
     </section>
 
-    <footer>
-      <p>More games coming soon!</p>
-    </footer>
+    <Footer class="page-footer" />
   </main>
 </Layout>
 
@@ -74,11 +73,9 @@ const games = [
     gap: 1.5rem;
   }
 
-  footer {
-    text-align: center;
+  .page-footer {
     margin-top: 3rem;
     padding-top: 2rem;
     border-top: 1px solid var(--color-bg-card);
-    color: var(--color-text-muted);
   }
 </style>

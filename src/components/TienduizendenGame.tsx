@@ -323,6 +323,11 @@ export default function TienduizendenGame() {
         </button>
       </div>
 
+      <footer className="game-footer">
+        <p>All processing happens in your browser. No data is sent to any server.</p>
+        <p>Made by <a href="https://robinvanbaalen.nl" target="_blank" rel="noopener">Robin</a>.</p>
+      </footer>
+
       {/* Score Input Modal */}
       {scoreModal.isOpen && (
         <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && closeScoreModal()}>

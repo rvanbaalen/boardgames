@@ -558,4 +558,30 @@ import TienduizendenGame from '../components/TienduizendenGame';
     25% { transform: translateX(-10px); }
     75% { transform: translateX(10px); }
   }
+
+  /* Footer */
+  .game-footer {
+    padding: 1rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+
+  .game-footer p {
+    margin: 0;
+  }
+
+  .game-footer p + p {
+    margin-top: 0.5rem;
+  }
+
+  .game-footer a {
+    color: var(--text-muted);
+    text-decoration: underline;
+    transition: color 0.2s ease;
+  }
+
+  .game-footer a:hover {
+    color: var(--text-light);
+  }
 </style>
