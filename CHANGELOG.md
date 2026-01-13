@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.0](https://github.com/rvanbaalen/boardgames/compare/boardgames-v0.0.4...boardgames-v0.1.0) (2026-01-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* improve README with features and game details ([#9](https://github.com/rvanbaalen/boardgames/issues/9))
+
+### Features
+
+* improve README with features and game details ([#9](https://github.com/rvanbaalen/boardgames/issues/9)) ([46bc47f](https://github.com/rvanbaalen/boardgames/commit/46bc47f9fa44e4b7e281ce69c9dd97213c733e93))
+
 ## [0.0.4](https://github.com/rvanbaalen/boardgames/compare/boardgames-v0.0.3...boardgames-v0.0.4) (2026-01-13)
 
 
