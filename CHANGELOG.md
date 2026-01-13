@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.4](https://github.com/rvanbaalen/boardgames/compare/boardgames-v0.0.3...boardgames-v0.0.4) (2026-01-13)
+
+
+### Features
+
+* **tienduizenden:** vertical layout, animations, and UX improvements ([#7](https://github.com/rvanbaalen/boardgames/issues/7)) ([d277d9b](https://github.com/rvanbaalen/boardgames/commit/d277d9bda7ed1b8ed252743bf5e4978f6c4e0029))
+
 ## [0.0.3](https://github.com/rvanbaalen/boardgames/compare/boardgames-v0.0.2...boardgames-v0.0.3) (2026-01-13)
 
 
