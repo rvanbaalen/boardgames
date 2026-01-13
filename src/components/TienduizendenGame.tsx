@@ -325,7 +325,7 @@ export default function TienduizendenGame() {
 
       <footer className="game-footer">
         <p>All processing happens in your browser. No data is sent to any server.</p>
-        <p>Made by <a href="https://robinvanbaalen.nl" target="_blank" rel="noopener">Robin</a>.</p>
+        <p>Made by <a href="https://robinvanbaalen.nl?utm_source=boardgames&utm_medium=footer&utm_campaign=tienduizenden" target="_blank">Robin</a>.</p>
       </footer>
 
       {/* Score Input Modal */}
