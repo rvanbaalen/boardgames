@@ -1,0 +1,84 @@
+---
+import Layout from '../layouts/Layout.astro';
+import GameCard from '../components/GameCard.astro';
+
+const games = [
+  {
+    id: 'tienduizenden',
+    title: 'Tienduizenden',
+    description: 'Een klassiek Nederlands dobbelspel. Gooi de dobbelstenen en probeer als eerste 10.000 punten te halen!',
+    descriptionEn: 'A classic Dutch dice game. Roll the dice and be the first to reach 10,000 points!',
+    players: '2-6',
+    duration: '30-60 min',
+    available: true,
+  },
+];
+---
+
+<Layout title="Board Game Score Cards">
+  <main>
+    <header>
+      <h1>Board Game Score Cards</h1>
+      <p>Digital score tracking for your favorite board games</p>
+    </header>
+
+    <section class="games-grid">
+      {games.map((game) => (
+        <GameCard
+          id={game.id}
+          title={game.title}
+          description={game.description}
+          descriptionEn={game.descriptionEn}
+          players={game.players}
+          duration={game.duration}
+          available={game.available}
+        />
+      ))}
+    </section>
+
+    <footer>
+      <p>More games coming soon!</p>
+    </footer>
+  </main>
+</Layout>
+
+<style>
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--color-primary), #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  header p {
+    color: var(--color-text-muted);
+    font-size: 1.1rem;
+  }
+
+  .games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-bg-card);
+    color: var(--color-text-muted);
+  }
+</style>
