@@ -31,7 +31,7 @@ export default function TienduizendenGame() {
   const [currentScoreInput, setCurrentScoreInput] = useState('0');
   const [rulesModalOpen, setRulesModalOpen] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [expandedHistory, setExpandedHistory] = useState<Set<string>>(new Set());
+  const [deleteConfirmPlayer, setDeleteConfirmPlayer] = useState<string | null>(null);
   const [confettiActive, setConfettiActive] = useState(false);
 
   // Load game from localStorage
@@ -67,15 +67,21 @@ export default function TienduizendenGame() {
     }]);
   }, [players.length]);
 
-  const deletePlayer = useCallback((id: string) => {
+  const confirmDeletePlayer = useCallback((id: string) => {
+    setDeleteConfirmPlayer(id);
+  }, []);
+
+  const deletePlayer = useCallback(() => {
+    if (!deleteConfirmPlayer) return;
     setPlayers(prev => {
-      const newPlayers = prev.filter(p => p.id !== id);
+      const newPlayers = prev.filter(p => p.id !== deleteConfirmPlayer);
       if (currentPlayerIndex >= newPlayers.length && newPlayers.length > 0) {
         setCurrentPlayerIndex(0);
       }
       return newPlayers;
     });
-  }, [currentPlayerIndex]);
+    setDeleteConfirmPlayer(null);
+  }, [currentPlayerIndex, deleteConfirmPlayer]);
 
   const updatePlayerName = useCallback((id: string, name: string) => {
     setPlayers(prev => prev.map(p =>
@@ -167,18 +173,6 @@ export default function TienduizendenGame() {
     nextTurn();
   }, [nextTurn]);
 
-  const toggleHistory = useCallback((playerId: string) => {
-    setExpandedHistory(prev => {
-      const next = new Set(prev);
-      if (next.has(playerId)) {
-        next.delete(playerId);
-      } else {
-        next.add(playerId);
-      }
-      return next;
-    });
-  }, []);
-
   const getSortedPlayers = useCallback(() => {
     return [...players].sort((a, b) => b.score - a.score);
   }, [players]);
@@ -213,7 +207,7 @@ export default function TienduizendenGame() {
       <header className="game-header">
         <h1>
           <DiceIcon />
-          TIENDUIZEND
+          TIENDUIZENDEN
         </h1>
         <div className="target-score">Eerste tot 10.000 wint!</div>
       </header>
@@ -231,26 +225,42 @@ export default function TienduizendenGame() {
                 key={player.id}
                 className={`player-card ${isActive ? 'active' : ''} ${isWinner ? 'winner' : ''}`}
               >
+                <button
+                  className="btn-delete-small"
+                  onClick={() => confirmDeletePlayer(player.id)}
+                  aria-label="Verwijder speler"
+                >
+                  ×
+                </button>
                 {isWinner && <div className="winner-badge">WINNAAR!</div>}
                 <div className="player-header">
-                  <div className="player-name">
-                    <span className={`player-rank rank-${rank <= 3 ? rank : 'other'}`}>
-                      {rank}
-                    </span>
-                    <input
-                      type="text"
-                      value={player.name}
-                      onChange={(e) => updatePlayerName(player.id, e.target.value)}
-                      onClick={(e) => (e.target as HTMLInputElement).select()}
-                    />
-                    {isActive && <span className="turn-indicator">aan de beurt</span>}
-                  </div>
+                  <span className={`player-rank rank-${rank <= 3 ? rank : 'other'}`}>
+                    {rank}
+                  </span>
+                  <input
+                    type="text"
+                    value={player.name}
+                    onChange={(e) => updatePlayerName(player.id, e.target.value)}
+                    onClick={(e) => (e.target as HTMLInputElement).select()}
+                    className="player-name-input"
+                  />
                 </div>
                 <div className="player-score">
                   {player.score.toLocaleString('nl-NL')}
                 </div>
                 <div className="progress-bar">
                   <div className="progress-fill" style={{ width: `${progress}%` }} />
+                </div>
+                <div className="score-history">
+                  {player.history.length === 0 ? (
+                    <span className="history-empty">Nog geen scores</span>
+                  ) : (
+                    player.history.slice().reverse().map((h, i) => (
+                      <span key={i} className={`history-item ${h.type}`}>
+                        {h.type === 'farkle' ? '💥 Kaput' : '+' + h.value.toLocaleString('nl-NL')}
+                      </span>
+                    ))
+                  )}
                 </div>
                 <div className="player-actions">
                   <button
@@ -263,30 +273,9 @@ export default function TienduizendenGame() {
                     className="btn btn-farkle"
                     onClick={() => farkle(player.id)}
                   >
-                    <span role="img" aria-label="farkle">💥</span>
-                  </button>
-                  <button
-                    className="btn btn-delete"
-                    onClick={() => deletePlayer(player.id)}
-                  >
-                    <span role="img" aria-label="delete">🗑</span>
+                    💥 Kaput
                   </button>
                 </div>
-                <div
-                  className="history-toggle"
-                  onClick={() => toggleHistory(player.id)}
-                >
-                  {player.history.length} beurten — tik voor geschiedenis
-                </div>
-                {expandedHistory.has(player.id) && (
-                  <div className="score-history">
-                    {player.history.slice(-20).map((h, i) => (
-                      <span key={i} className={`history-item ${h.type}`}>
-                        {h.type === 'farkle' ? '💥' : '+' + h.value}
-                      </span>
-                    ))}
-                  </div>
-                )}
               </div>
             );
           })}
@@ -413,6 +402,26 @@ export default function TienduizendenGame() {
             <button className="modal-close" onClick={() => setConfirmModalOpen(false)}>
               Annuleren
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm Delete Player Modal */}
+      {deleteConfirmPlayer && (
+        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setDeleteConfirmPlayer(null)}>
+          <div className="modal modal-small">
+            <h2>Speler verwijderen?</h2>
+            <p className="confirm-text">
+              {players.find(p => p.id === deleteConfirmPlayer)?.name} wordt verwijderd.
+            </p>
+            <div className="modal-actions">
+              <button className="btn-cancel-action" onClick={() => setDeleteConfirmPlayer(null)}>
+                Annuleren
+              </button>
+              <button className="btn-confirm-action" onClick={deletePlayer}>
+                Verwijder
+              </button>
+            </div>
           </div>
         </div>
       )}

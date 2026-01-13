@@ -196,6 +196,18 @@ const gameSchema = {
   .player-card.active {
     border-color: var(--accent-green);
     box-shadow: 0 0 20px rgba(8, 217, 214, 0.3);
+    animation: pulse-active 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-active {
+    0%, 100% {
+      border-color: var(--accent-green);
+      box-shadow: 0 0 20px rgba(8, 217, 214, 0.3);
+    }
+    50% {
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 30px rgba(181, 55, 242, 0.4);
+    }
   }
 
   .player-card.winner {
@@ -211,38 +223,57 @@ const gameSchema = {
 
   .player-header {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     margin-bottom: 0.5rem;
     text-align: center;
   }
 
-  .player-name {
-    font-size: 1.1rem;
-    font-weight: 600;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-    width: 100%;
-  }
-
-  .player-name input {
+  .player-name-input {
     background: transparent;
     border: none;
     color: var(--text-light);
     font-family: inherit;
-    font-size: inherit;
-    font-weight: inherit;
+    font-size: 1.1rem;
+    font-weight: 600;
     width: 100%;
+    max-width: 120px;
     padding: 0.25rem;
     border-radius: 4px;
     text-align: center;
   }
 
-  .player-name input:focus {
+  .player-name-input:focus {
     outline: none;
     background: rgba(255,255,255,0.1);
+  }
+
+  .btn-delete-small {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.4;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-delete-small:hover {
+    opacity: 1;
+    background: rgba(233, 69, 96, 0.2);
+    color: var(--accent-red);
   }
 
   .player-rank {
@@ -339,35 +370,31 @@ const gameSchema = {
     color: white;
   }
 
-  .btn-delete {
-    background: rgba(255,255,255,0.1);
-    color: var(--text-muted);
-    font-size: 1.2rem;
-  }
-
-  /* Score History Toggle */
-  .history-toggle {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    text-align: center;
-    padding: 0.5rem 0;
-    cursor: pointer;
-  }
-
+  /* Score History */
   .score-history {
+    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid rgba(255,255,255,0.1);
-    max-height: 150px;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.2);
     overflow-y: auto;
+    min-height: 60px;
+  }
+
+  .history-empty {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-align: center;
+    opacity: 0.6;
   }
 
   .history-item {
-    font-size: 0.75rem;
-    padding: 0.2rem 0.5rem;
+    font-size: 0.85rem;
+    font-family: 'Space Mono', monospace, system-ui;
+    padding: 0.3rem 0.5rem;
     border-radius: 4px;
     background: rgba(255,255,255,0.05);
   }
@@ -455,6 +482,44 @@ const gameSchema = {
     text-align: center;
     margin: 1rem 0;
     color: var(--text-muted);
+  }
+
+  .modal-small {
+    max-width: 280px;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .btn-confirm-action,
+  .btn-cancel-action {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-confirm-action {
+    background: var(--accent-red);
+    color: white;
+  }
+
+  .btn-cancel-action {
+    background: rgba(255,255,255,0.1);
+    color: var(--text-light);
+  }
+
+  .btn-confirm-action:active,
+  .btn-cancel-action:active {
+    transform: scale(0.95);
   }
 
   /* Score Input Modal */
@@ -592,18 +657,6 @@ const gameSchema = {
     font-size: 4rem;
     margin-bottom: 1rem;
     opacity: 0.5;
-  }
-
-  /* Turn indicator animation */
-  .turn-indicator {
-    font-size: 0.75rem;
-    color: var(--accent-green);
-    animation: blink 1.5s ease-in-out infinite;
-  }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
   }
 
   @keyframes shake {
