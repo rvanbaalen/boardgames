@@ -11,11 +11,12 @@ const {
   title,
   description = "Digital score cards for your favorite board games. Track scores offline with no data sent to servers.",
   canonicalPath = "",
-  ogImage = "/boardgames/og-image.png",
+  ogImage = "/og-image.png",
   schema
 } = Astro.props;
 
-const siteUrl = "https://rvanbaalen.github.io/boardgames";
+const baseUrl = import.meta.env.BASE_URL;
+const siteUrl = import.meta.env.SITE;
 const canonicalUrl = `${siteUrl}${canonicalPath}`;
 
 const defaultSchema = {
@@ -53,8 +54,8 @@ const schemaData = schema || defaultSchema;
     <link rel="canonical" href={canonicalUrl} />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/boardgames/favicon.svg" />
-    <link rel="apple-touch-icon" href="/boardgames/apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href={`${baseUrl}favicon.svg`} />
+    <link rel="apple-touch-icon" href={`${baseUrl}apple-touch-icon.png`} />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />

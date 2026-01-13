@@ -3,8 +3,8 @@ import react from '@astrojs/react';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://rvanbaalen.github.io',
-  base: '/boardgames',
+  site: process.env.SITE_URL || 'https://boardgames.robinvanbaalen.nl',
+  base: process.env.BASE_PATH || '/',
   integrations: [react()],
   output: 'static',
 });
