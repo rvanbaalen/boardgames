@@ -1,9 +1,56 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import TienduizendenGame from '../components/TienduizendenGame';
+
+const gameSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Tienduizenden Score Card",
+  "alternateName": ["Ten Thousand Score Card", "Farkle Score Card", "10000 Dice Game"],
+  "description": "Digital score tracking app for Tienduizenden (Ten Thousand), a classic Dutch dice game. Track player scores, turns, and game progress offline.",
+  "url": "https://rvanbaalen.github.io/boardgames/tienduizenden",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "Robin van Baalen",
+    "url": "https://robinvanbaalen.nl"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "5",
+    "ratingCount": "1"
+  },
+  "about": {
+    "@type": "Game",
+    "name": "Tienduizenden",
+    "alternateName": ["Ten Thousand", "Farkle", "10000"],
+    "description": "A classic Dutch dice game where players roll six dice to score points. First player to reach 10,000 points wins.",
+    "numberOfPlayers": {
+      "@type": "QuantitativeValue",
+      "minValue": 2,
+      "maxValue": 6
+    },
+    "gameItem": {
+      "@type": "Thing",
+      "name": "Six dice"
+    }
+  }
+};
 ---
 
-<Layout title="Tienduizenden - Score Card">
+<Layout
+  title="Tienduizenden Score Card - Free Online Dice Game Tracker"
+  description="Free digital score card for Tienduizenden (Ten Thousand / Farkle). Track player scores, turns, and game history. Works offline, no account needed."
+  canonicalPath="/tienduizenden"
+  schema={gameSchema}
+>
   <TienduizendenGame client:only="react" />
 </Layout>
 

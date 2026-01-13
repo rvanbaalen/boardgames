@@ -14,9 +14,37 @@ const games = [
     available: true,
   },
 ];
+
+const homeSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Board Game Score Cards",
+  "description": "Free digital score cards for your favorite board games. Track scores offline with no data sent to servers.",
+  "url": "https://rvanbaalen.github.io/boardgames",
+  "author": {
+    "@type": "Person",
+    "name": "Robin van Baalen",
+    "url": "https://robinvanbaalen.nl"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Robin van Baalen",
+    "url": "https://robinvanbaalen.nl"
+  },
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://rvanbaalen.github.io/boardgames/?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+};
 ---
 
-<Layout title="Board Game Score Cards">
+<Layout
+  title="Board Game Score Cards - Free Digital Score Tracking"
+  description="Free digital score cards for your favorite board games. Track scores offline, no account needed. Supports Tienduizenden, and more games coming soon!"
+  canonicalPath=""
+  schema={homeSchema}
+>
   <main>
     <header>
       <h1>Board Game Score Cards</h1>
