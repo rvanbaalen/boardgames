@@ -1,0 +1,634 @@
+---
+import Layout from '../layouts/Layout.astro';
+import TienduizendenGame from '../components/TienduizendenGame';
+
+const gameSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Tienduizenden Score Card",
+  "alternateName": ["Ten Thousand Score Card", "Farkle Score Card", "10000 Dice Game"],
+  "description": "Digital score tracking app for Tienduizenden (Ten Thousand), a classic Dutch dice game. Track player scores, turns, and game progress offline.",
+  "url": "https://rvanbaalen.github.io/boardgames/tienduizenden",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "Robin van Baalen",
+    "url": "https://robinvanbaalen.nl"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "5",
+    "ratingCount": "1"
+  },
+  "about": {
+    "@type": "Game",
+    "name": "Tienduizenden",
+    "alternateName": ["Ten Thousand", "Farkle", "10000"],
+    "description": "A classic Dutch dice game where players roll six dice to score points. First player to reach 10,000 points wins.",
+    "numberOfPlayers": {
+      "@type": "QuantitativeValue",
+      "minValue": 2,
+      "maxValue": 6
+    },
+    "gameItem": {
+      "@type": "Thing",
+      "name": "Six dice"
+    }
+  }
+};
+---
+
+<Layout
+  title="Tienduizenden Score Card - Free Online Dice Game Tracker"
+  description="Free digital score card for Tienduizenden (Ten Thousand / Farkle). Track player scores, turns, and game history. Works offline, no account needed."
+  canonicalPath="/tienduizenden"
+  schema={gameSchema}
+>
+  <TienduizendenGame client:only="react" />
+</Layout>
+
+<style is:global>
+  /* Tienduizenden Game Styles */
+  :root {
+    --bg-dark: #1a1a2e;
+    --bg-card: #16213e;
+    --accent-red: #e94560;
+    --accent-yellow: #f9ed69;
+    --accent-green: #08d9d6;
+    --accent-purple: #b537f2;
+    --text-light: #eaeaea;
+    --text-muted: #8892b0;
+    --dice-dot: #1a1a2e;
+    --winner-gold: #ffd700;
+  }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: 'Fredoka', system-ui, -apple-system, sans-serif;
+    background: var(--bg-dark);
+    background-image:
+      radial-gradient(circle at 20% 80%, rgba(233, 69, 96, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(8, 217, 214, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(181, 55, 242, 0.05) 0%, transparent 70%);
+    color: var(--text-light);
+    min-height: 100vh;
+    min-height: 100dvh;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .game-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  /* Header */
+  .game-header {
+    padding: 1rem;
+    text-align: center;
+    background: linear-gradient(180deg, rgba(22, 33, 62, 0.9) 0%, transparent 100%);
+    position: relative;
+    z-index: 10;
+  }
+
+  .game-header h1 {
+    font-family: 'Space Mono', monospace, system-ui;
+    font-size: 1.8rem;
+    background: linear-gradient(135deg, var(--accent-yellow), var(--accent-red));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  .dice-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--accent-yellow);
+    border-radius: 6px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    padding: 4px;
+    gap: 2px;
+    animation: wiggle 3s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  .dice-icon .dot {
+    width: 6px;
+    height: 6px;
+    background: var(--dice-dot);
+    border-radius: 50%;
+    margin: auto;
+  }
+
+  .dice-icon .dot-1,
+  .dice-icon .dot-5,
+  .dice-icon .dot-9 { opacity: 1; }
+  .dice-icon .dot-2,
+  .dice-icon .dot-4,
+  .dice-icon .dot-6,
+  .dice-icon .dot-8 { opacity: 0; }
+  .dice-icon .dot-3,
+  .dice-icon .dot-7 { opacity: 1; }
+
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(-3deg); }
+    50% { transform: rotate(3deg); }
+  }
+
+  .target-score {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+  }
+
+  /* Main content */
+  .game-main {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0.5rem 1rem 1rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Player Cards */
+  .players-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .player-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 1rem;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+  }
+
+  .player-card.active {
+    border-color: var(--accent-green);
+    box-shadow: 0 0 20px rgba(8, 217, 214, 0.3);
+  }
+
+  .player-card.winner {
+    border-color: var(--winner-gold);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+    animation: pulse-winner 1s ease-in-out infinite;
+  }
+
+  @keyframes pulse-winner {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
+
+  .player-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .player-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .player-name input {
+    background: transparent;
+    border: none;
+    color: var(--text-light);
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    width: 120px;
+    padding: 0.25rem;
+    border-radius: 4px;
+  }
+
+  .player-name input:focus {
+    outline: none;
+    background: rgba(255,255,255,0.1);
+  }
+
+  .player-rank {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  .rank-1 { background: var(--winner-gold); color: var(--bg-dark); }
+  .rank-2 { background: #c0c0c0; color: var(--bg-dark); }
+  .rank-3 { background: #cd7f32; color: var(--bg-dark); }
+  .rank-other { background: var(--text-muted); color: var(--bg-dark); }
+
+  .player-score {
+    font-family: 'Space Mono', monospace, system-ui;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-yellow);
+    text-align: center;
+    margin: 0.5rem 0;
+  }
+
+  .player-card.winner .player-score {
+    color: var(--winner-gold);
+  }
+
+  .winner-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--winner-gold);
+    color: var(--bg-dark);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    transform: rotate(15deg);
+  }
+
+  .progress-bar {
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-green), var(--accent-purple));
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+
+  .player-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+  }
+
+  .btn:active {
+    transform: scale(0.95);
+  }
+
+  .btn-add {
+    background: linear-gradient(135deg, var(--accent-green), #06b6b3);
+    color: var(--bg-dark);
+  }
+
+  .btn-subtract {
+    background: linear-gradient(135deg, var(--accent-red), #c73e54);
+    color: white;
+  }
+
+  .btn-farkle {
+    background: linear-gradient(135deg, var(--accent-purple), #9333ea);
+    color: white;
+    flex: 0.6;
+  }
+
+  .btn-delete {
+    background: rgba(255,255,255,0.1);
+    color: var(--text-muted);
+    flex: 0.4;
+    font-size: 1.2rem;
+  }
+
+  /* Score History Toggle */
+  .history-toggle {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 0.5rem;
+    cursor: pointer;
+  }
+
+  .score-history {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .history-item {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.05);
+  }
+
+  .history-item.add { color: var(--accent-green); }
+  .history-item.subtract { color: var(--accent-red); }
+  .history-item.farkle { color: var(--accent-purple); }
+
+  /* Bottom Actions */
+  .bottom-bar {
+    padding: 1rem;
+    background: linear-gradient(0deg, var(--bg-dark) 0%, transparent 100%);
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-large {
+    flex: 1;
+    min-width: calc(50% - 0.5rem);
+    padding: 1rem;
+    border-radius: 16px;
+    font-size: 1rem;
+  }
+
+  .btn-add-player {
+    background: linear-gradient(135deg, var(--accent-yellow), #f59e0b);
+    color: var(--bg-dark);
+  }
+
+  .btn-new-game {
+    background: rgba(255,255,255,0.1);
+    color: var(--text-light);
+  }
+
+  .btn-rules {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-muted);
+    min-width: 100%;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .modal {
+    background: var(--bg-card);
+    border-radius: 24px;
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 360px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .modal h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+    color: var(--accent-yellow);
+  }
+
+  .modal-close {
+    background: var(--accent-red);
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  .confirm-text {
+    text-align: center;
+    margin: 1rem 0;
+    color: var(--text-muted);
+  }
+
+  /* Score Input Modal */
+  .score-input-display {
+    font-family: 'Space Mono', monospace, system-ui;
+    font-size: 3rem;
+    text-align: center;
+    color: var(--accent-yellow);
+    margin: 1rem 0;
+    min-height: 4rem;
+  }
+
+  .numpad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+
+  .numpad-btn {
+    padding: 1rem;
+    font-size: 1.5rem;
+    font-family: 'Space Mono', monospace, system-ui;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.1);
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .numpad-btn:active {
+    transform: scale(0.95);
+    background: rgba(255,255,255,0.2);
+  }
+
+  .numpad-btn.clear {
+    background: var(--accent-red);
+    color: white;
+  }
+
+  .numpad-btn.backspace {
+    background: var(--accent-purple);
+    color: white;
+  }
+
+  .numpad-btn.confirm {
+    background: linear-gradient(135deg, var(--accent-green), #06b6b3);
+    color: var(--bg-dark);
+    grid-column: span 3;
+  }
+
+  /* Quick Score Buttons */
+  .quick-scores {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .quick-btn {
+    flex: 1;
+    min-width: calc(33% - 0.5rem);
+    padding: 0.5rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .quick-btn:active {
+    background: rgba(255,255,255,0.1);
+  }
+
+  /* Rules Content */
+  .rules-content {
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  .rules-content h3 {
+    color: var(--accent-green);
+    margin: 1rem 0 0.5rem;
+    font-size: 1rem;
+  }
+
+  .rules-content ul {
+    margin-left: 1rem;
+  }
+
+  .rules-content li {
+    margin: 0.25rem 0;
+  }
+
+  .scoring-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.5rem 0;
+    font-size: 0.85rem;
+  }
+
+  .scoring-table td {
+    padding: 0.4rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .scoring-table td:last-child {
+    text-align: right;
+    color: var(--accent-yellow);
+    font-family: 'Space Mono', monospace, system-ui;
+  }
+
+  /* Winner Celebration */
+  .confetti {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-muted);
+  }
+
+  .empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+
+  /* Turn indicator animation */
+  .turn-indicator {
+    font-size: 0.75rem;
+    color: var(--accent-green);
+    animation: blink 1.5s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+  }
+
+  /* Footer */
+  .game-footer {
+    padding: 1rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+
+  .game-footer p {
+    margin: 0;
+  }
+
+  .game-footer p + p {
+    margin-top: 0.5rem;
+  }
+
+  .game-footer a {
+    color: var(--text-muted);
+    text-decoration: underline;
+    transition: color 0.2s ease;
+  }
+
+  .game-footer a:hover {
+    color: var(--text-light);
+  }
+</style>

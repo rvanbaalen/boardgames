@@ -1,18 +1,80 @@
 ---
 interface Props {
   title: string;
+  description?: string;
+  canonicalPath?: string;
+  ogImage?: string;
+  schema?: object;
 }
 
-const { title } = Astro.props;
+const {
+  title,
+  description = "Digital score cards for your favorite board games. Track scores offline with no data sent to servers.",
+  canonicalPath = "",
+  ogImage = "/boardgames/og-image.png",
+  schema
+} = Astro.props;
+
+const siteUrl = "https://rvanbaalen.github.io/boardgames";
+const canonicalUrl = `${siteUrl}${canonicalPath}`;
+
+const defaultSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Board Game Score Cards",
+  "description": description,
+  "url": siteUrl,
+  "author": {
+    "@type": "Person",
+    "name": "Robin van Baalen",
+    "url": "https://robinvanbaalen.nl"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Robin van Baalen",
+    "url": "https://robinvanbaalen.nl"
+  }
+};
+
+const schemaData = schema || defaultSchema;
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content="Digital score cards for your favorite board games" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="author" content="Robin van Baalen" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#0f172a" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/boardgames/favicon.svg" />
+    <link rel="apple-touch-icon" href="/boardgames/apple-touch-icon.png" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={`${siteUrl}${ogImage}`} />
+    <meta property="og:site_name" content="Board Game Score Cards" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonicalUrl} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={`${siteUrl}${ogImage}`} />
+
+    <!-- Schema.org structured data -->
+    <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
+
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
   </head>

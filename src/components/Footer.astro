@@ -1,0 +1,38 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<footer class:list={["site-footer", className]}>
+  <p>All processing happens in your browser. No data is sent to any server.</p>
+  <p class="made-by">Made by <a href="https://robinvanbaalen.nl?utm_source=boardgames&utm_medium=footer&utm_campaign=score_cards" target="_blank">Robin</a>.</p>
+</footer>
+
+<style>
+  .site-footer {
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--color-text-muted, #94a3b8);
+  }
+
+  .site-footer p {
+    margin: 0;
+  }
+
+  .site-footer .made-by {
+    margin-top: 0.5rem;
+  }
+
+  .site-footer a {
+    color: inherit;
+    text-decoration: underline;
+    transition: color 0.2s ease;
+  }
+
+  .site-footer a:hover {
+    color: var(--color-text, #f8fafc);
+  }
+</style>
