@@ -163,8 +163,8 @@ const gameSchema = {
   /* Main content */
   .game-main {
     flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
     padding: 0.5rem 1rem 1rem;
     -webkit-overflow-scrolling: touch;
   }
@@ -172,8 +172,10 @@ const gameSchema = {
   /* Player Cards */
   .players-list {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 0.75rem;
+    height: 100%;
+    min-height: 0;
   }
 
   .player-card {
@@ -184,6 +186,11 @@ const gameSchema = {
     overflow: hidden;
     border: 2px solid transparent;
     transition: all 0.3s ease;
+    flex: 1;
+    min-width: 160px;
+    max-width: 280px;
+    display: flex;
+    flex-direction: column;
   }
 
   .player-card.active {
@@ -204,17 +211,20 @@ const gameSchema = {
 
   .player-header {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
     margin-bottom: 0.5rem;
+    text-align: center;
   }
 
   .player-name {
     font-size: 1.1rem;
     font-weight: 600;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.25rem;
+    width: 100%;
   }
 
   .player-name input {
@@ -224,9 +234,10 @@ const gameSchema = {
     font-family: inherit;
     font-size: inherit;
     font-weight: inherit;
-    width: 120px;
+    width: 100%;
     padding: 0.25rem;
     border-radius: 4px;
+    text-align: center;
   }
 
   .player-name input:focus {
@@ -294,11 +305,12 @@ const gameSchema = {
 
   .player-actions {
     display: flex;
+    flex-direction: column;
     gap: 0.5rem;
+    margin-top: auto;
   }
 
   .btn {
-    flex: 1;
     padding: 0.75rem;
     border: none;
     border-radius: 12px;
@@ -322,40 +334,35 @@ const gameSchema = {
     color: var(--bg-dark);
   }
 
-  .btn-subtract {
-    background: linear-gradient(135deg, var(--accent-red), #c73e54);
-    color: white;
-  }
-
   .btn-farkle {
     background: linear-gradient(135deg, var(--accent-purple), #9333ea);
     color: white;
-    flex: 0.6;
   }
 
   .btn-delete {
     background: rgba(255,255,255,0.1);
     color: var(--text-muted);
-    flex: 0.4;
     font-size: 1.2rem;
   }
 
   /* Score History Toggle */
   .history-toggle {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--text-muted);
     text-align: center;
-    padding: 0.5rem;
+    padding: 0.5rem 0;
     cursor: pointer;
   }
 
   .score-history {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 0.25rem;
     margin-top: 0.5rem;
     padding-top: 0.5rem;
     border-top: 1px solid rgba(255,255,255,0.1);
+    max-height: 150px;
+    overflow-y: auto;
   }
 
   .history-item {
@@ -366,7 +373,6 @@ const gameSchema = {
   }
 
   .history-item.add { color: var(--accent-green); }
-  .history-item.subtract { color: var(--accent-red); }
   .history-item.farkle { color: var(--accent-purple); }
 
   /* Bottom Actions */

@@ -4,7 +4,7 @@ interface Player {
   id: string;
   name: string;
   score: number;
-  history: { value: number; type: 'add' | 'subtract' | 'farkle' }[];
+  history: { value: number; type: 'add' | 'farkle' }[];
   color: string;
 }
 
@@ -27,8 +27,7 @@ export default function TienduizendenGame() {
   const [scoreModal, setScoreModal] = useState<{
     isOpen: boolean;
     playerId: string | null;
-    mode: 'add' | 'subtract';
-  }>({ isOpen: false, playerId: null, mode: 'add' });
+  }>({ isOpen: false, playerId: null });
   const [currentScoreInput, setCurrentScoreInput] = useState('0');
   const [rulesModalOpen, setRulesModalOpen] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
@@ -84,13 +83,13 @@ export default function TienduizendenGame() {
     ));
   }, []);
 
-  const openScoreModal = useCallback((playerId: string, mode: 'add' | 'subtract') => {
-    setScoreModal({ isOpen: true, playerId, mode });
+  const openScoreModal = useCallback((playerId: string) => {
+    setScoreModal({ isOpen: true, playerId });
     setCurrentScoreInput('0');
   }, []);
 
   const closeScoreModal = useCallback(() => {
-    setScoreModal({ isOpen: false, playerId: null, mode: 'add' });
+    setScoreModal({ isOpen: false, playerId: null });
   }, []);
 
   const appendDigit = useCallback((digit: string) => {
@@ -135,16 +134,12 @@ export default function TienduizendenGame() {
       const newPlayers = prev.map(p => {
         if (p.id !== scoreModal.playerId) return p;
 
-        const newScore = scoreModal.mode === 'add'
-          ? p.score + value
-          : Math.max(0, p.score - value);
-
         return {
           ...p,
-          score: newScore,
+          score: p.score + value,
           history: [...p.history, {
-            value: scoreModal.mode === 'add' ? value : -value,
-            type: scoreModal.mode,
+            value: value,
+            type: 'add' as const,
           }],
         };
       });
@@ -260,15 +255,9 @@ export default function TienduizendenGame() {
                 <div className="player-actions">
                   <button
                     className="btn btn-add"
-                    onClick={() => openScoreModal(player.id, 'add')}
+                    onClick={() => openScoreModal(player.id)}
                   >
                     + Score
-                  </button>
-                  <button
-                    className="btn btn-subtract"
-                    onClick={() => openScoreModal(player.id, 'subtract')}
-                  >
-                    - Score
                   </button>
                   <button
                     className="btn btn-farkle"
@@ -293,7 +282,7 @@ export default function TienduizendenGame() {
                   <div className="score-history">
                     {player.history.slice(-20).map((h, i) => (
                       <span key={i} className={`history-item ${h.type}`}>
-                        {h.type === 'farkle' ? '💥' : (h.value >= 0 ? '+' : '') + h.value}
+                        {h.type === 'farkle' ? '💥' : '+' + h.value}
                       </span>
                     ))}
                   </div>
@@ -333,7 +322,7 @@ export default function TienduizendenGame() {
         <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && closeScoreModal()}>
           <div className="modal">
             <h2>
-              {currentPlayer?.name}: {scoreModal.mode === 'add' ? '+' : '-'}Score
+              {currentPlayer?.name}: +Score
             </h2>
             <div className="quick-scores">
               {QUICK_SCORES.map(score => (
