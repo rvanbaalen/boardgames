@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.3](https://github.com/rvanbaalen/boardgames/compare/boardgames-v0.0.2...boardgames-v0.0.3) (2026-01-13)
+
+
+### Bug Fixes
+
+* **layout:** use flexbox for full-height page layout ([04730ae](https://github.com/rvanbaalen/boardgames/commit/04730ae845f88569188abf19dfb726abe4f8bb0c))
+
 ## [0.0.2](https://github.com/rvanbaalen/boardgames/compare/boardgames-v0.0.1...boardgames-v0.0.2) (2026-01-13)
 
 
