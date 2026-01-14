@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/rvanbaalen/boardgames/compare/boardgames-v0.1.0...boardgames-v0.1.1) (2026-01-14)
+
+
+### Features
+
+* **amerikaans-jokeren:** add score card for Amerikaans Jokeren card game ([#11](https://github.com/rvanbaalen/boardgames/issues/11)) ([8878724](https://github.com/rvanbaalen/boardgames/commit/8878724c241a359b2dadf347ee3d32fda5d28b2a))
+
 ## [0.1.0](https://github.com/rvanbaalen/boardgames/compare/boardgames-v0.0.4...boardgames-v0.1.0) (2026-01-13)
 
 
